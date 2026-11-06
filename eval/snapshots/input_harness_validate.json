@@ -1,0 +1,7 @@
+{
+  "prompt": "Run Harness validation on the following DW design plan.\n\nDesign plan:\n- ODS: ods_orders (datax, incremental on updated_at)\n- DIM: dim_product (from source, natural_key=[product_id])\n- DWD: dwd_orders (fact, grain=[order_id], 3 measures)\n- DWS: dws_orders_daily (aggregate, grain=[date], source=dwd_orders)\n- ADS: ads_gmv (2 metrics)\n\nSQL artifacts: 5 DDL statements, 3 DML statements\n\nRun all 3 levels (structure/consistency/semantic) and return JSON with validation_results array.",
+  "design_summary": {
+    "ods_count": 1, "dim_count": 1, "dwd_count": 1, "dws_count": 1, "ads_count": 1,
+    "sql_count": 8
+  }
+}

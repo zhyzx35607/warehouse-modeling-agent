@@ -1,0 +1,5 @@
+{
+  "prompt": "Design the DAG deployment plan for Dolphin Scheduler.\n\nTask ID: task-abc123\nDW layers: ODS (1 table, datax), DIM (1 table), DWD (1 table), DWS (1 table), ADS (1 table)\n\nCreate DS project with namespace {task_id}__{domain}, register data sources, create DAGs with proper dependencies.\n\nReturn JSON with: project (name), dags (list of {dag_name, layer, tasks, schedule}).",
+  "task_id": "task-abc123",
+  "domain": "financial"
+}

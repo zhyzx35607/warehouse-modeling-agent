@@ -1,0 +1,7 @@
+{
+  "prompt": "Design ADS tables for a order operations dashboard.\n\nDWS sources:\n- dws_order_building_daily(stat_date, building_id, building_name, leased_area, rentable_area, daily_accrued_rent)\n- dws_order_building_yearly(stat_year, building_id, annual_rental_income)\n\nGoal: daily shop occupancy rate and annual shop revenue income. Keep daily and yearly grains in separate ADS tables. Occupancy rate is derived from leased_area and rentable_area and must declare both as parent_metrics. Materialize physical dimensions, fields, requirement_coverage, DDL, and load_sql.\n\nExisting metric: leased_area (atomic).",
+  "required_requirements": ["daily shop occupancy", "leased_area", "rentable_area", "annual shop revenue income"],
+  "existing_metrics": [
+    {"metric_name": "leased_area", "metric_type": "atomic", "definition_sql": "SUM(leased_area)", "source_table": "dws_order_building_daily"}
+  ]
+}

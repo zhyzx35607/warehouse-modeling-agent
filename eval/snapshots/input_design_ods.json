@@ -1,0 +1,4 @@
+{
+  "prompt": "Design the ODS layer for the following source tables. Return JSON with ods_designs array.\n\nSource tables:\n- orders (id BIGINT, amount DECIMAL, status VARCHAR, created_at DATETIME, updated_at DATETIME)\n- products (id BIGINT, name VARCHAR, price DECIMAL)\n\nGoal: realtime ecommerce data warehouse\n\nFor each table, return: ods_table, source_table, sync_method (datax or flink_cdc), incremental_strategy (full/incremental), fields (with source_type and doris_type mapping).",
+  "modeling_goal": "Realtime ecommerce data warehouse"
+}

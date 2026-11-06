@@ -1,0 +1,5 @@
+{
+  "prompt": "You are exploring database 'ecommerce' with the following tables. Generate a complete SchemaExploration output.\n\nTables found:\n- orders (id BIGINT PK, amount DECIMAL(19,4), status VARCHAR(20), created_at DATETIME, updated_at DATETIME, user_id BIGINT)\n- products (id BIGINT PK, name VARCHAR(255), category VARCHAR(50), price DECIMAL(10,2))\n- users (id BIGINT PK, name VARCHAR(100), phone VARCHAR(20), email VARCHAR(128))\n\nForeign keys: orders.user_id -> users.id\nRow estimates: orders=500000, products=5000, users=10000\n\nReturn JSON with tables key containing table schemas with fields, data types, Doris type mapping, and relationships.",
+  "source_database": "ecommerce_mysql",
+  "task_goal": "Build financial data warehouse"
+}

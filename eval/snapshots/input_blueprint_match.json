@@ -1,0 +1,5 @@
+{
+  "prompt": "Match the following source tables against the Blueprint Library.\n\nSource tables: orders, products, users, order_items, payments\nDomain hint: ecommerce\n\nAvailable blueprints:\n1. ecommerce_model (domain=ecommerce, tables=[orders,users,products,order_items])\n2. financial_model (domain=financial, tables=[accounts,transactions])\n3. logistics_model (domain=logistics, tables=[orders,shipments])\n\nReturn JSON with matched_blueprints array sorted by similarity score. Each match should have: blueprint_name, score (0-1), matched_tables, unmatched_tables.",
+  "source_tables": ["orders", "products", "users", "order_items", "payments"],
+  "domain_hints": ["ecommerce"]
+}

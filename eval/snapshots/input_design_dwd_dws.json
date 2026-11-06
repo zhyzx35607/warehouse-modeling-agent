@@ -1,0 +1,4 @@
+{
+  "prompt": "Design DWD and topic-wide DWS tables for order leasing.\n\nGoal: daily occupancy by shop and by unit. Occupancy rate is leased_area / rentable_area. Annual revenue income must use a separate yearly grain.\n\nDWD: dwd_lease_contract(contract_date, building_id, unit_id, leased_area, daily_accrued_rent).\nDIM: dim_building(building_id, building_name, rentable_area), dim_unit(unit_id, unit_name, building_id, rentable_area).\n\nReturn JSON with dwd_designs and dws_designs. Every DWD design must include grain, fact_table, DDL, and executable load_sql (INSERT ... SELECT from the ODS landing database). Every DWS design must include fields, measures, grain, group_by_dimensions, requirement_coverage, DDL, and load_sql. Do not silently drop a requested grain or formula dependency.",
+  "required_requirements": ["shop daily grain", "unit daily grain", "leased_area", "rentable_area", "annual revenue income"]
+}

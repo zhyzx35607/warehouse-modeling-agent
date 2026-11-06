@@ -1,0 +1,58 @@
+[project]
+name = "warehouse-modeling-agent"
+version = "0.1.0"
+description = "AI-powered data warehouse modeling agent"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+live = [
+    "langgraph>=0.2.0",
+    "langgraph-checkpoint-postgres>=2.0.0",
+    "langchain>=0.3.0",
+    "langchain-core>=0.3.0",
+    "langchain-mcp-adapters>=0.1.0",
+    "langchain-openai>=0.3.0",
+    "mcp>=1.20.0,<2",
+    "asyncpg>=0.29.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "websockets>=12.0",
+    "httpx>=0.27.0",
+    "click>=8.1.0",
+    "neo4j>=5.25.0",
+    "psycopg[binary]>=3.2.0",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "pymysql>=1.1.0",
+    "pg8000>=1.30",  # PostgreSQL/Kingbase source exploration (README claims support)
+    # VENDORED SOURCE DEPENDENCY — do not change. cli-anything-dolphinscheduler
+    # is not on any public index; it ships in vendor/ and must be installed
+    # first: pip install -e vendor/cli-anything-dolphinscheduler
+    # Kept as a BARE NAME on purpose so the requirement resolves against the
+    # installed source dist. URL/version forms break Docker or local builds.
+    "cli-anything-dolphinscheduler",
+    "gmssl>=3.2.2",
+]
+
+ollama = ["langchain-ollama>=0.3"]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24.0",
+
+]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["wren_agent*", "warehouse_demo*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.setuptools.package-data]
+wren_agent = ["skills/*.md"]

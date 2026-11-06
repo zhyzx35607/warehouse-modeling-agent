@@ -1,0 +1,140 @@
+# Skillgrade evaluation configuration for Wren Agent Skills
+# Run: npx skillgrade --ci --threshold=0.7
+#
+# Each task tests one skill with a representative input.
+# Graders check output structure, field presence, and type correctness.
+
+version: 1
+tasks:
+  - name: "explore-schema-output-structure"
+    description: "Verify explore-schema skill produces valid SchemaExploration JSON"
+    skills:
+      - "explore-schema"
+    files:
+      "input/explore-schema.json": "snapshots/input_explore_schema.json"
+    graders:
+      - type: command
+        name: "structure-check"
+        weight: 1.0
+        command: "python graders/check_explore_schema.py $OUTPUT $REFERENCE"
+
+  - name: "grill-expert-question-format"
+    description: "Verify grill-expert generates valid ClarificationItem JSON"
+    skills:
+      - "grill-expert"
+    files:
+      "input/grill-expert.json": "snapshots/input_grill_expert.json"
+    graders:
+      - type: command
+        name: "clarification-format"
+        weight: 1.0
+        command: "python graders/check_grill_expert.py $OUTPUT $INPUT"
+
+  - name: "design-ods-output-structure"
+    description: "Verify design-ods skill produces valid ODS design with sync configs"
+    skills:
+      - "design-ods"
+    files:
+      "input/design-ods.json": "snapshots/input_design_ods.json"
+    graders:
+      - type: command
+        name: "ods-structure"
+        weight: 1.0
+        command: "python graders/check_design_ods.py $OUTPUT $INPUT"
+
+  - name: "design-dim-registry-check"
+    description: "Verify design-dim skill checks DimensionRegistry"
+    skills:
+      - "design-dim"
+    files:
+      "input/design-dim.json": "snapshots/input_design_dim.json"
+    graders:
+      - type: command
+        name: "dim-structure"
+        weight: 1.0
+        command: "python graders/check_design_dim.py $OUTPUT $INPUT"
+
+  - name: "design-dwd-dws-topic-wide-coverage"
+    description: "Verify DWS covers requested grains and formula dependencies with executable wide tables"
+    skills:
+      - "design-dwd-dws"
+    files:
+      "input/design-dwd-dws.json": "snapshots/input_design_dwd_dws.json"
+    graders:
+      - type: command
+        name: "topic-coverage-check"
+        weight: 1.0
+        command: "python graders/check_design_dwd_dws.py $OUTPUT $INPUT"
+
+  - name: "design-ads-grain-and-lineage"
+    description: "Verify ADS separates incompatible grains and declares physical dimensions and parent metrics"
+    skills:
+      - "design-ads"
+    files:
+      "input/design-ads.json": "snapshots/input_design_ads.json"
+    graders:
+      - type: command
+        name: "grain-lineage-check"
+        weight: 1.0
+        command: "python graders/check_design_ads.py $OUTPUT $INPUT"
+
+  - name: "harness-validate-three-levels"
+    description: "Verify harness validate produces structure/consistency/semantic results"
+    skills:
+      - "harness-validate"
+    files:
+      "input/harness-validate.json": "snapshots/input_harness_validate.json"
+    graders:
+      - type: command
+        name: "validate-check"
+        weight: 1.0
+        command: "python graders/check_harness_validate.py $OUTPUT $INPUT"
+
+  - name: "dag-deploy-namespace-convention"
+    description: "Verify dag-deploy follows namespace conventions"
+    skills:
+      - "dag-deploy"
+    files:
+      "input/dag-deploy.json": "snapshots/input_dag_deploy.json"
+    graders:
+      - type: command
+        name: "dag-check"
+        weight: 1.0
+        command: "python graders/check_dag_deploy.py $OUTPUT $INPUT"
+
+  - name: "blueprint-match-similarity"
+    description: "Verify blueprint-match computes similarity and ranks results"
+    skills:
+      - "blueprint-match"
+    files:
+      "input/blueprint-match.json": "snapshots/input_blueprint_match.json"
+    graders:
+      - type: command
+        name: "blueprint-check"
+        weight: 1.0
+        command: "python graders/check_blueprint_match.py $OUTPUT $INPUT"
+
+  - name: "schema-drift-classification"
+    description: "Verify schema-drift correctly classifies breaking vs additive changes"
+    skills:
+      - "schema-drift"
+    files:
+      "input/schema-drift.json": "snapshots/input_schema_drift.json"
+    graders:
+      - type: command
+        name: "drift-check"
+        weight: 1.0
+        command: "python graders/check_schema_drift.py $OUTPUT $INPUT"
+
+# Config
+trials: 1
+provider: custom
+command: python ${ROOT}/../scripts/run_skill_check.py
+parallel: 6
+timeout_per_task: 120
+
+# Thresholds
+threshold:
+  smoke: 0.6
+  reliable: 0.7
+  regression: 0.8

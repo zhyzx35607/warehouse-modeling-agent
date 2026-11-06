@@ -1,0 +1,11 @@
+{
+  "prompt": "Detect schema drifts between previous and current snapshots.\n\nPrevious snapshot:\n- orders: {id: bigint, amount: decimal, status: varchar, deleted: tinyint}\n- products: {id: bigint, name: varchar, price: decimal}\n\nCurrent snapshot:\n- orders: {id: bigint, amount: decimal, status: varchar, remark: varchar}\n- products: {id: bigint, name: varchar, price: decimal, category: varchar}\n\nClassify each change as breaking or additive. For breaking changes, generate auto-fix SQL.\n\nReturn JSON with schema_drifts array.",
+  "prior_snapshots": {
+    "orders": {"id": "bigint", "amount": "decimal", "status": "varchar", "deleted": "tinyint"},
+    "products": {"id": "bigint", "name": "varchar", "price": "decimal"}
+  },
+  "current_snapshots": {
+    "orders": {"id": "bigint", "amount": "decimal", "status": "varchar", "remark": "varchar"},
+    "products": {"id": "bigint", "name": "varchar", "price": "decimal", "category": "varchar"}
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "modeling_goal": "Daily synthetic sales payment summary",
+  "source_tables": [
+    {
+      "name": "dwd_rent",
+      "fields": [
+        {
+          "name": "stat_date"
+        },
+        {
+          "name": "org_id"
+        },
+        {
+          "name": "payment"
+        },
+        {
+          "name": "payment_period_date"
+        }
+      ]
+    }
+  ],
+  "required_grains": [
+    "stat_date×org_id"
+  ],
+  "expectations": [
+    "explicit_column_list",
+    "no_invented_columns",
+    "grain_coverage",
+    "no_derived_in_dws",
+    "doris_dialect",
+    "data_guard"
+  ]
+}

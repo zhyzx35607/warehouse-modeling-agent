@@ -1,0 +1,5 @@
+{
+  "prompt": "Based on the following database exploration, generate clarification questions for the human expert. Goal: Build a financial management data warehouse.\n\nTable: orders\n  Fields: id(BIGINT PK), amount(DECIMAL), status(VARCHAR), created_at(DATETIME), user_id(BIGINT)\n  Row estimate: 500000\n\nTable: products\n  Fields: id(BIGINT PK), name(VARCHAR), price(DECIMAL)\n  Row estimate: 5000\n\nRelationship: orders.user_id -> users.id (unverified)\n\nGenerate up to 5 clarification items. Return JSON: {\"clarifications\": [{\"question\", \"context\", \"candidates\", \"recommended\", \"recommended_reason\", \"impact_level\", \"blocking\", \"clarification_type\"}]}",
+  "modeling_goal": "Build financial management data warehouse",
+  "sensitive_fields": []
+}

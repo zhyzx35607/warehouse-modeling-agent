@@ -1,0 +1,4 @@
+{
+  "prompt": "Design the DIM layer for the following source tables. Check if dimensions already exist in the registry before creating new ones.\n\nSource tables:\n- products (id BIGINT PK, name VARCHAR, category VARCHAR, price DECIMAL) — 5000 rows, likely a dimension\n- users (id BIGINT PK, name VARCHAR, phone VARCHAR, email VARCHAR) — 10000 rows, likely a dimension\n\nExisting dimensions in registry: none\nODS landing database: ods_demo\n\nReturn JSON with dim_designs containing: dim_name, dim_table, source, source_table, natural_key, surrogate_key, version, ddl, and executable load_sql (INSERT ... SELECT from ods_demo.ods_{source_table}, including SCD2 columns).",
+  "existing_dimensions": []
+}
