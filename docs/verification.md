@@ -22,3 +22,17 @@
 本次没有执行真实模型、PostgreSQL、Doris、DolphinScheduler、Neo4j 的完整联网联调；没有测量 LLM 准确率、吞吐量或生产成本。浏览器已经完成离线演示验收，结果截图见 `screenshots/offline-demo.png`；不将离线规则演示视为 Live 模型效果验证。
 
 本地运行产物、测试日志、`.venv`、`node_modules`、`dashboard/dist` 与 `.demo-data` 均由 `.gitignore` 排除；这些结果不是要提交的业务数据。
+
+## v0.2 新功能验收（2026-11-06）
+
+- 完整 Python 测试：813 passed，670 warnings，34.81 秒。
+- `python -S scripts/verify_demo.py` 与 `python -S scripts/verify_lab.py`：通过。后者实际经过 CSV 上传、质量失败 422、运行历史、分页预览、复检、差异、ZIP 与路径/限额校验。
+- `python -S -m warehouse_demo.evaluate`：12/12 合成案例满足预期，10 个故障被检测、2 个对照无误报；逐例定义见 `eval/quality_cases.json`，不等同于生产或模型效果指标。
+- Vue 生产构建通过。浏览器实际导入五份 CSV，得到 2 订单与 10000 分实收；数据预览、历史对比和六阶段耗时已实际展示。
+- CSV、运行数据库及评测生成物保存在被忽略的 `.demo-data/`；仓库只提交合成示例。
+
+最终交叉审查修复两项可复现缺陷后，完整 Python 回归为 **815 passed，670 warnings，41.41 秒**；5 项 JavaScript 回归和 Vue 生产构建通过。两个真实 HTTP 验证脚本及 12 个质量案例再次通过。
+
+- 合法输入产生 `10000000000000001` 分时，HTTP 导入及历史读取均保留精确十进制字符串，页面用 BigInt 显示 `100000000000000.01` 元；原始 SQLite/JSON 保留整数。测试也拒绝把已经丢精度的 JavaScript number 显示为精确金额。
+- CSV 异步读取开始时清空旧输入、禁用提交，且执行函数再次检查状态；异步回归证明读取中不会提交旧 CSV，旧读取迟到也不会覆盖新选择。
+- 最终 v0.2 页面截图为 `screenshots/v02-lab.jpg`。

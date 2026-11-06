@@ -1,0 +1,14 @@
+[
+  {"id":"clean-baseline","sql":null,"expected_failures":[]},
+  {"id":"read-only-control","sql":"SELECT COUNT(*) FROM orders","expected_failures":[]},
+  {"id":"ads-payment-drift","sql":"UPDATE ads_daily_sales SET paid_cents=paid_cents+1","expected_failures":["payment_total_reconciles"]},
+  {"id":"ads-item-drift","sql":"UPDATE ads_daily_sales SET gross_cents=gross_cents+1","expected_failures":["items_total_reconciles"]},
+  {"id":"ads-count-drift","sql":"UPDATE ads_daily_sales SET order_count=order_count+1","expected_failures":["paid_order_count"]},
+  {"id":"lost-fact-row","sql":"DELETE FROM dwd_order WHERE order_id=1","expected_failures":["order_rows_preserved"]},
+  {"id":"null-dimension-key","sql":"UPDATE dim_customer SET customer_id=NULL WHERE customer_id=1","expected_failures":["dim_customer:non_null_grain"]},
+  {"id":"duplicate-ads-grain","sql":"DROP INDEX uq_ads_daily_sales; INSERT INTO ads_daily_sales SELECT * FROM ads_daily_sales LIMIT 1;","expected_failures":["ads_daily_sales:unique_grain"]},
+  {"id":"source-orphan","sql":"UPDATE orders SET customer_id=999999 WHERE order_id=1","expected_failures":["source_foreign_keys"]},
+  {"id":"payment-source-changed","sql":"UPDATE payments SET amount_cents=amount_cents+1 WHERE payment_id=1","expected_failures":["payment_total_reconciles"]},
+  {"id":"item-source-changed","sql":"UPDATE order_items SET quantity=quantity+1 WHERE item_id=1","expected_failures":["items_total_reconciles"]},
+  {"id":"fact-payment-mismatch","sql":"UPDATE dwd_order SET paid_cents=paid_cents+1 WHERE order_id=1","expected_failures":["paid_order_balance"]}
+]

@@ -1,18 +1,21 @@
 """Inspect SQLite metadata, compile a small semantic plan, execute and reconcile it.
 
 This is an explicit rule-based demo planner, not a replacement for the live LLM
-graph. Its inputs and all output records are synthetic and reproducible.
+graph. Inputs are generated synthetic records or five validated local CSV files.
 """
 from __future__ import annotations
 
 import html
 import json
 from contextlib import closing
+from datetime import datetime, timezone
 from pathlib import Path
 import random
 import re
 import sqlite3
+from time import perf_counter
 from typing import Any
+from .sources import parse_sources, import_sources
 
 
 def quote(name: str) -> str:
@@ -118,7 +121,18 @@ def validate(db: sqlite3.Connection, plan: list[dict[str, Any]]) -> list[dict[st
     return checks
 
 
-def run(output: Path, orders: int = 120, seed: int = 7) -> dict[str, Any]:
+def run(output: Path, orders: int = 120, seed: int = 7, source_tables: dict | None = None) -> dict[str, Any]:
+    started = perf_counter()
+    trace = []
+    stage_start = started
+    def finish_stage(name: str, summary: str, status: str = 'completed') -> None:
+        nonlocal stage_start
+        now = perf_counter()
+        trace.append({'stage': name, 'status': status, 'elapsed_ms': round((now-stage_start)*1000, 3), 'summary': summary})
+        stage_start = now
+    parsed, manifest = parse_sources(source_tables) if source_tables is not None else (None, [])
+    if parsed is None and (type(orders) is not int or not 1 <= orders <= 10000 or type(seed) is not int):
+        raise ValueError('orders must be an integer from 1 to 10000 and seed must be an integer')
     # Keep the final path component intact until link checks have completed.
     output = Path(output).absolute()
     if output.is_symlink() or getattr(output, 'is_junction', lambda: False)():
@@ -130,17 +144,35 @@ def run(output: Path, orders: int = 120, seed: int = 7) -> dict[str, Any]:
     # Exclusive creation also prevents concurrent runs from sharing a database.
     with dbpath.open('xb'):
         pass
-    seed_source(dbpath, orders, seed)
+    if parsed is None:
+        seed_source(dbpath, orders, seed)
+    else:
+        with closing(sqlite3.connect(dbpath)) as db, db:
+            import_sources(db, parsed)
+        orders = len(parsed['orders'])
+    finish_stage('source', f'{orders} orders loaded from ' + ('synthetic generator' if parsed is None else 'five CSV files'))
     with closing(sqlite3.connect(dbpath)) as db, db:
         schema = explore(db)
+        finish_stage('explore', f'{len(schema)} source tables inspected')
         plan = plan_model(schema)
+        finish_stage('plan', f'{len(plan)} models compiled with the fixed ecommerce contract')
         sql = materialize(db, plan)
+        finish_stage('materialize', f'{len(sql)} SQL statements executed')
         checks = validate(db, plan)
+        finish_stage('validate', f'{sum(c["passed"] for c in checks)}/{len(checks)} checks passed', 'completed' if all(c['passed'] for c in checks) else 'failed')
         db.row_factory = sqlite3.Row
         daily = [dict(row) for row in db.execute('SELECT * FROM ads_daily_sales ORDER BY order_date')]
         counts = {m['name']: db.execute(f"SELECT COUNT(*) FROM {quote(m['name'])}").fetchone()[0] for m in plan}
     lineage = [{'source':source,'target':model['name']} for model in plan for source in model['sources']]
     report = {'mode':'offline-demo','planner':'deterministic ecommerce rules; no LLM call','dialect':'sqlite','synthetic':True,'seed':seed,'source_orders':orders,'status':'passed' if all(c['passed'] for c in checks) else 'failed','checks':checks,'row_counts':counts,'daily_sales':daily,'lineage':lineage,'models':plan,'schema':schema}
+    report.update({'synthetic': parsed is None, 'source_mode': 'synthetic' if parsed is None else 'csv',
+                   'seed': seed if parsed is None else None, 'source_manifest': manifest,
+                   'created_at': datetime.now(timezone.utc).isoformat()})
+    from .history import diagnose, fingerprint
+    with closing(sqlite3.connect(dbpath.as_uri() + '?mode=ro', uri=True)) as db:
+        report['diagnostics'] = diagnose(db, report)
+    finish_stage('diagnose', f'{len(report["diagnostics"]["failures"])} failed checks with bounded evidence')
+    report.update(database_sha256=fingerprint(dbpath), trace=trace, elapsed_ms=round((perf_counter()-started)*1000, 3))
     def write_artifact(name: str, content: str) -> None:
         # Never replace a file or follow a symlink created after the initial check.
         with (output / name).open('x', encoding='utf-8') as artifact:
@@ -151,5 +183,6 @@ def run(output: Path, orders: int = 120, seed: int = 7) -> dict[str, Any]:
     mermaid = 'flowchart LR\n'+'\n'.join(f"    {e['source']} --> {e['target']}" for e in lineage)
     write_artifact('lineage.mmd',mermaid+'\n')
     rows = ''.join(f"<tr><td>{html.escape(c['name'])}</td><td>{'PASS' if c['passed'] else 'FAIL'}</td><td>{c['actual']}</td><td>{c['expected']}</td></tr>" for c in checks)
-    write_artifact('report.html','<!doctype html><meta charset="utf-8"><title>Warehouse demo</title><style>body{font:16px system-ui;max-width:1000px;margin:40px auto}td,th{padding:8px;border-bottom:1px solid #ddd;text-align:left}pre{white-space:pre-wrap}</style><h1>Warehouse Modeling · 离线演示</h1><p>SQLite 实际执行；合成电商数据；确定性规则规划；无模型调用。</p><h2>'+report['status']+'</h2><table><tr><th>检查</th><th>结果</th><th>实际</th><th>期望</th></tr>'+rows+'</table><h2>模型与血缘</h2><pre>'+html.escape(mermaid)+'</pre>')
+    source_label = '合成电商数据' if parsed is None else '用户导入 CSV 数据'
+    write_artifact('report.html','<!doctype html><meta charset="utf-8"><title>Warehouse report</title><style>body{font:16px system-ui;max-width:1000px;margin:40px auto}td,th{padding:8px;border-bottom:1px solid #ddd;text-align:left}pre{white-space:pre-wrap}</style><h1>Warehouse Modeling · 本地数据实验室</h1><p>SQLite 实际执行；'+source_label+'；确定性规则规划；无模型调用。</p><h2>'+report['status']+'</h2><table><tr><th>检查</th><th>结果</th><th>实际</th><th>期望</th></tr>'+rows+'</table><h2>模型与血缘</h2><pre>'+html.escape(mermaid)+'</pre>')
     return report

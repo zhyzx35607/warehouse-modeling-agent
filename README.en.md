@@ -15,3 +15,7 @@ Build the Vue dashboard with `cd dashboard && npm ci && npm run build`, then run
 Live mode is separate: install `vendor/cli-anything-dolphinscheduler`, then `pip install -e ".[live,dev]"`, configure your own `.env` from `.env.example`, and run `python run.py`. Live dependencies include PostgreSQL and user-configured model/database/scheduler services. `/live` opens the full dashboard. Missing model credentials fail startup; provider failures do not silently switch into the offline demo. Embedding configuration is independent of chat configuration.
 
 Run `python scripts/verify_demo.py`, `python -m pytest tests -q`, and the dashboard build to verify. See the Chinese README for details and `NOTICE.md` for source provenance and license scope.
+
+## v0.2 local data workspace
+
+Import five UTF-8 ecommerce CSV files with `python -m warehouse_demo --input-dir examples/ecommerce-csv`, or use the browser. The workspace supports persistent run history, bounded read-only table previews, source fingerprints, run comparison, SQL-backed quality diagnostics, stage timing, snapshot revalidation and artifact ZIP exports. The fixed ecommerce contract is explicit; this is not arbitrary-schema LLM modeling. Run `python -S scripts/verify_lab.py` and `python -S -m warehouse_demo.evaluate` for the HTTP workflow and 12 authored fault-injection cases.

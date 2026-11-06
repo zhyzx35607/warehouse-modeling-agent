@@ -9,6 +9,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -S scripts/verify_demo.py
+      - run: python -S scripts/verify_lab.py
+      - run: python -S -m warehouse_demo.evaluate
   python:
     runs-on: ubuntu-latest
     steps:
@@ -33,3 +35,4 @@ jobs:
           cache-dependency-path: dashboard/package-lock.json
       - run: npm ci --ignore-scripts
       - run: npm run build
+      - run: node --test tests/*.test.mjs

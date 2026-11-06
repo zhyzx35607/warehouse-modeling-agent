@@ -68,7 +68,7 @@
             </span>
           </div>
 
-          <span class="version-label">v0.1.0</span>
+          <span class="version-label">v0.2.0</span>
         </nav>
       </div>
     </header>

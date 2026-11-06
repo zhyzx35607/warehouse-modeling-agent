@@ -1,10 +1,42 @@
 # Warehouse Modeling Agent
 
-一个用于学习、验证和扩展的数仓建模项目。保留 LangGraph 建模工作流、结构化设计编译器、数据库工具、质量校验、人工确认、评估套件和 Vue 看板，同时提供**无需账号、模型或外部数据库的离线电商演示**。
+从源数据探查、分层建模到质量诊断的个人数仓 Agent 工作台。Live 路径保留 LangGraph、结构化 SQL 编译器、人工确认和数据库/调度适配器；**本地数据实验室可直接导入 CSV，实际落表、对账、比较运行并导出产物，无需模型或外部数据库。**
 
 [![Verify](https://github.com/zhyzx35607/warehouse-modeling-agent/actions/workflows/verify.yml/badge.svg)](https://github.com/zhyzx35607/warehouse-modeling-agent/actions/workflows/verify.yml)
 
-![实际离线执行结果：10 个模型、26 项检查通过](docs/screenshots/offline-demo.png)
+![v0.2 实际 CSV 导入、历史运行与六阶段执行轨迹](docs/screenshots/v02-lab.jpg)
+
+## v0.2 可操作的完整链路
+
+| 功能 | 实际行为 |
+|---|---|
+| 导入自己的数据 | 五份 UTF-8 电商 CSV；先验证表头、整数范围、主键、日期与外键，再落入 SQLite；来源保存 SHA-256 |
+| 分层建模 | ODS/DIM/DWD/DWS/ADS 共 10 个模型，20 条真实 DDL/索引语句，金额粒度检查 |
+| 数据预览 | 源表与结果表的只读分页；SQLite `mode=ro` 和 `query_only`，仅允许已知表，不接受任意 SQL |
+| 质量诊断 | 26 项检查、金额异常订单证据、沿血缘计算受影响模型；失败运行也保留用于调查 |
+| 历史与对比 | 重启后重新打开结果，比较两次运行的行数、实收/应收、检查变化及 CSV 指纹 |
+| 快照复检 | 对现有数据库重新只读校验，检测其 SHA-256 是否变化；初始报告保持不变 |
+| 执行轨迹 | source → explore → plan → materialize → validate → diagnose 的真实阶段、耗时、状态与摘要 |
+| 导出 | SQL、JSON、HTML、Mermaid 血缘及 SQLite 完整 ZIP；文件路径由服务端白名单控制 |
+| 故障回归 | 12 个可重复的合成案例，分别检查金额漂移、丢行、重复粒度、空键、孤儿记录等 |
+
+这里的 CSV 导入服从明确的五表电商契约，不是任意领域的自动建模；本地诊断来自 SQL 证据，不声称已经识别所有业务根因。完整操作与面试能力对应见 [功能与验证地图](docs/capabilities.md)。
+
+## 导入 CSV 与复现异常
+
+看板点击“下载五表模板 ZIP”，或使用仓库内 `examples/ecommerce-csv/` 的五份合成样例。网页选择“导入 CSV”并一次选中五份文件，点击“导入并建模”。也可以执行：
+
+```powershell
+python -m warehouse_demo --input-dir examples/ecommerce-csv
+python -S scripts/verify_lab.py
+python -S -m warehouse_demo.evaluate
+```
+
+样例包含 2 笔订单，已支付订单明细为 10000 分、拆分支付为 6000 + 4000 分。将自己的副本 `payments.csv` 中 6000 改为 5900 再导入，工作台会展示 `paid_order_balance` 失败、订单差额 -100 分及受影响的 DWD/DWS/ADS；两次结果可以直接比较。不会自动修改支付数据来制造“通过”。
+
+导入总大小最多 4 MiB，订单最多 10000 行、其他表各最多 50000 行；CSV 列顺序遵循模板，金额以整数分表示。源 CSV 由浏览器发送到本机服务，不发给模型。运行保存在 `.demo-data/`；默认仅监听 `127.0.0.1`，当前为单机应用。
+
+SQLite 和原始 JSON 产物保存整数分。HTTP 中超过 JavaScript 安全整数范围的值使用十进制字符串，页面以 BigInt 格式化金额，避免大金额在浏览器丢失一分钱。读取新 CSV 期间禁用导入，旧文件不会被误提交。
 
 ## 三分钟运行
 
@@ -101,6 +133,6 @@ npm run build
 
 测试使用本地占位配置和模拟适配器。离线验证还会故意篡改汇总金额，确认质量检查能够发现失败。CI 分开验证无第三方依赖的演示、Python 单元测试和 Vue 构建。
 
-本地验证：794 项 Python 测试通过；离线演示 10 个模型、26 项质量检查通过；Vue 生产构建通过。范围、依赖版本与未验证项见 [验证记录](docs/verification.md)。[简历与面试演示](docs/resume.md) 包含项目描述、架构图与三分钟演示步骤。
+本地验证：815 项 Python、5 项 JavaScript 测试通过；离线演示 10 个模型、26 项质量检查通过；Vue 生产构建通过。范围、依赖版本与未验证项见 [验证记录](docs/verification.md)。[简历与面试演示](docs/resume.md) 包含项目描述、架构图与三分钟演示步骤。
 
 [English overview](README.en.md)
