@@ -136,3 +136,10 @@ npm run build
 本地验证：815 项 Python、5 项 JavaScript 测试通过；离线演示 10 个模型、26 项质量检查通过；Vue 生产构建通过。范围、依赖版本与未验证项见 [验证记录](docs/verification.md)。[简历与面试演示](docs/resume.md) 包含项目描述、架构图与三分钟演示步骤。
 
 [English overview](README.en.md)
+
+## 相关个人 Agent 项目（Portfolio）
+
+- [Warehouse Modeling Agent](https://github.com/zhyzx35607/warehouse-modeling-agent) — LangGraph 数仓分层建模、SQL 编译校验与本地 CSV 实验室
+- [Knowledge Navigator Agent](https://github.com/zhyzx35607/knowledge-navigator-agent) — 有界搜索/阅读工具、SQLite FTS5 + 混合召回与实时过期引用核验
+- [Report Workbench Agent](https://github.com/zhyzx35607/report-workbench-agent) — 确定性 CSV 统计/图表、多模板批次队列、SSE 进度与可追溯报告导出
+- [TraceForge](https://github.com/zhyzx35607/TraceForge) — 证据驱动的代码故障调查、SHA-256 审批绑定补丁与隔离回归验证工作台
